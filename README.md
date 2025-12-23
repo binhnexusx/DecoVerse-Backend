@@ -1,11 +1,11 @@
-# 🌌 DecoVerse Backend
+#  DecoVerse Backend
 
 Backend API for **DecoVerse** – an AI-powered interior design platform supporting
 2D / 3D / 360° spaces, real-time collaboration, and automated cost estimation (BoQ).
 
 ---
 
-## 🚀 Tech Stack
+##  Tech Stack
 
 - **Framework**: NestJS (Node.js + TypeScript)
 - **Database**: Supabase PostgreSQL
@@ -13,10 +13,6 @@ Backend API for **DecoVerse** – an AI-powered interior design platform support
 - **AI Integration**: OpenAI API
 - **Realtime**: Supabase Realtime
 - **API Docs**: Swagger
-- **Code Quality**: ESLint + Prettier
-- **Git Hooks**: Husky + lint-staged + Commitlint
-- **Hosting**: Render (Free tier)
-- **IDE**: VS Code
 
 ---
 
