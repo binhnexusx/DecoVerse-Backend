@@ -23,7 +23,7 @@ Backend API for **DecoVerse** – an AI-powered interior design platform support
 ## 💻 Quick Start
 
 ```bash
-git clone <repo-url> decoverse-backend
+git clone https://github.com/binhnexusx/DecoVerse-Backend.git 
 cd decoverse-backend
 npm install
 npm run start:dev
@@ -115,3 +115,4 @@ npm run start:dev    # start in watch mode
 npm run build        # build production
 npm run lint         # run eslint
 npm run format       # run prettier
+```
