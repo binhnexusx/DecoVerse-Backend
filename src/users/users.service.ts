@@ -13,6 +13,7 @@ export class UsersService {
     return this.prisma.user.upsert({
       where: { auth0Id: userData.auth0Id },
       update: {
+        email: userData.email,
         name: userData.name,
       },
       create: {
