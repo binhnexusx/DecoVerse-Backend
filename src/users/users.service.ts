@@ -11,9 +11,9 @@ export class UsersService {
     name?: string;
   }) {
     return this.prisma.user.upsert({
-      where: { auth0Id: userData.auth0Id },
+      where: { email: userData.email },
       update: {
-        email: userData.email,
+        auth0Id: userData.auth0Id,
         name: userData.name,
       },
       create: {
