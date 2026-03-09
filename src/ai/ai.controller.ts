@@ -8,11 +8,15 @@ export class AiController {
   constructor(private readonly aiService: AiService) {}
 
   @Post('generate-preview')
-  async generatePreview(@Body() dto: GeneratePreviewDto) {
+  async generatePreview(@Body() dto: GeneratePreviewDto): Promise<unknown> {
     const prompt = buildInteriorPrompt(dto);
+    const result: unknown = await this.aiService.generateImage(prompt);
+    return result;
+  }
 
-    const result = await this.aiService.generateImage(prompt);
-
+  @Post('analyze')
+  async analyzeImage(@Body() body: { imageUrl: string }): Promise<unknown> {
+    const result: unknown = await this.aiService.analyzeImage(body.imageUrl);
     return result;
   }
 }
