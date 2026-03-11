@@ -16,3 +16,13 @@ model user {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model project {
+  id        String   @id @default(uuid())
+  name      String
+  prompt    String?
+  previewUrl String?
+  publicId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

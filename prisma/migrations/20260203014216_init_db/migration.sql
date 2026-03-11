@@ -1,4 +1,3 @@
--- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "auth0Id" TEXT NOT NULL,
@@ -11,8 +10,6 @@ CREATE TABLE "User" (
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
 CREATE UNIQUE INDEX "User_auth0Id_key" ON "User"("auth0Id");
 
--- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
