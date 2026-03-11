@@ -10,6 +10,10 @@ export class UsersService {
     email: string;
     name?: string;
   }) {
+    if (!userData.auth0Id) {
+      throw new Error('auth0Id is required for upsert operation');
+    }
+
     return this.prisma.user.upsert({
       where: { email: userData.email },
       update: {

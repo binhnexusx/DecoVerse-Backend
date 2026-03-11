@@ -13,6 +13,7 @@ model user {
   email     String   @unique
   name      String?
   picture   String?
+  projects  project[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -23,6 +24,8 @@ model project {
   prompt    String?
   previewUrl String?
   publicId  String?
+  userId    String
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

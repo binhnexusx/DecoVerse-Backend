@@ -1,0 +1,3 @@
+ALTER TABLE "project" ADD COLUMN     "userId" TEXT NOT NULL;
+
+ALTER TABLE "project" ADD CONSTRAINT "project_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;

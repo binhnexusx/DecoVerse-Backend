@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class ProjectsService {
@@ -7,12 +7,21 @@ export class ProjectsService {
 
   async create(data: {
     name: string;
-    prompt?: string;
-    previewUrl?: string;
-    publicId?: string;
+    prompt: string;
+    previewUrl: string;
+    publicId: string;
+    userId: string; 
   }) {
     return this.prisma.project.create({
-      data,
+      data: {
+        name: data.name,
+        prompt: data.prompt,
+        previewUrl: data.previewUrl,
+        publicId: data.publicId,
+        user: {
+          connect: { id: data.userId }, 
+        },
+      },
     });
   }
 }
