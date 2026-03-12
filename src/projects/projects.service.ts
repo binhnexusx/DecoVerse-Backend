@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "src/prisma/prisma.service";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class ProjectsService {
@@ -10,7 +10,7 @@ export class ProjectsService {
     prompt: string;
     previewUrl: string;
     publicId: string;
-    userId: string; 
+    userId: string;
   }) {
     return this.prisma.project.create({
       data: {
@@ -19,8 +19,19 @@ export class ProjectsService {
         previewUrl: data.previewUrl,
         publicId: data.publicId,
         user: {
-          connect: { id: data.userId }, 
+          connect: { id: data.userId },
         },
+      },
+    });
+  }
+
+  async findAll(userId: string) {
+    return this.prisma.project.findMany({
+      where: {
+        userId: userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }

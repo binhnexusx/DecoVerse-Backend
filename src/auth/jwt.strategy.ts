@@ -2,8 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
-import { PrismaService } from 'src/prisma/prisma.service'; 
-import { JwtPayload } from '@supabase/supabase-js';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+interface JwtPayload {
+  sub: string;
+  email?: string;
+  name?: string;
+  'https://decoverse.com/email'?: string;
+}
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private prisma: PrismaService) {
@@ -22,21 +29,22 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    const { sub, email, name } = payload;
+    const auth0Id = payload.sub;
+    const email = payload.email || payload['https://decoverse.com/email'];
 
     let user = await this.prisma.user.findUnique({
-      where: { auth0Id: sub },
+      where: { auth0Id: auth0Id },
     });
 
     if (!user) {
       user = await this.prisma.user.create({
         data: {
-          auth0Id: sub,
-          email: email || '',
-          name: name || 'New Designer',
+          auth0Id: auth0Id,
+          email: email || `user_${auth0Id}@decoverse.com`,
+          name: payload.name || 'New Designer',
         },
       });
     }
-    return user; 
+    return user;
   }
 }
