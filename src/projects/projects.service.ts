@@ -7,12 +7,32 @@ export class ProjectsService {
 
   async create(data: {
     name: string;
-    prompt?: string;
-    previewUrl?: string;
-    publicId?: string;
+    prompt: string;
+    previewUrl: string;
+    publicId: string;
+    userId: string;
   }) {
     return this.prisma.project.create({
-      data,
+      data: {
+        name: data.name,
+        prompt: data.prompt,
+        previewUrl: data.previewUrl,
+        publicId: data.publicId,
+        user: {
+          connect: { id: data.userId },
+        },
+      },
+    });
+  }
+
+  async findAll(userId: string) {
+    return this.prisma.project.findMany({
+      where: {
+        userId: userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 }

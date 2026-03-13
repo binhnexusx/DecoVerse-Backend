@@ -8,21 +8,37 @@ datasource db {
 }
 
 model user {
-  id        String   @id @default(uuid())
-  auth0Id   String   @unique
-  email     String   @unique
+  id        String    @id @default(uuid())
+  auth0Id   String    @unique
+  email     String    @unique
   name      String?
   picture   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  projects  project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model project {
-  id        String   @id @default(uuid())
-  name      String
+  id         String            @id @default(uuid())
+  name       String
+  publicId   String?
+  userId     String
+  user       user              @relation(fields: [userId], references: [id], onDelete: Cascade)
   prompt    String?
   previewUrl String?
-  publicId  String?
+  versions   project_version[]
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+}
+
+model project_version {
+  id        String   @id @default(uuid())
+  version   Int
+  projectId String
+  project   project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  designData Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([projectId, version])
 }

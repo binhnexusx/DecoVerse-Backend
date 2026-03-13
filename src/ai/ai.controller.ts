@@ -1,8 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { GeneratePreviewDto } from './dto/generate-preview.dto';
 import { buildInteriorPrompt } from './prompt.builder';
 import { ProjectsService } from 'src/projects/projects.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { GetUser } from '../common/decorators/get-user.decorator';
 
 interface AiGenerationResponse {
   imageUrl: string;
@@ -16,9 +18,11 @@ export class AiController {
     private readonly projectsService: ProjectsService,
   ) {}
 
+  @UseGuards(JwtAuthGuard) 
   @Post('generate-preview')
   async generatePreview(
     @Body() dto: GeneratePreviewDto,
+    @GetUser('id') userId: string, 
   ): Promise<AiGenerationResponse> {
     const prompt = buildInteriorPrompt(dto);
 
@@ -32,6 +36,7 @@ export class AiController {
         prompt,
         previewUrl: result.imageUrl,
         publicId: result.publicId,
+        userId: userId,
       });
     } catch (err) {
       console.error('Failed to save project:', err);
