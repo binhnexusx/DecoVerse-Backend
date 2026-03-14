@@ -19,4 +19,12 @@ export class GeneratePreviewDto {
   @IsOptional()
   @IsString()
   prompt?: string;
+
+  @IsOptional()
+  @IsString()
+  previewUrl: string;
+
+  @IsOptional()
+  @IsString()
+  publicId: string;
 }
