@@ -18,11 +18,11 @@ export class AiController {
     private readonly projectsService: ProjectsService,
   ) {}
 
-  @UseGuards(JwtAuthGuard) 
+  @UseGuards(JwtAuthGuard)
   @Post('generate-preview')
   async generatePreview(
     @Body() dto: GeneratePreviewDto,
-    @GetUser('id') userId: string, 
+    @GetUser('id') userId: string,
   ): Promise<AiGenerationResponse> {
     const prompt = buildInteriorPrompt(dto);
 
@@ -33,10 +33,11 @@ export class AiController {
     try {
       await this.projectsService.create({
         name: dto.projectName,
-        prompt,
-        previewUrl: result.imageUrl,
-        publicId: result.publicId,
+        prompt: dto.prompt ?? '',
+        previewUrl: dto.previewUrl,
+        publicId: dto.publicId,
         userId: userId,
+        designData: {},
       });
     } catch (err) {
       console.error('Failed to save project:', err);
