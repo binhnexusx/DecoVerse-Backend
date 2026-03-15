@@ -42,3 +42,17 @@ model project_version {
 
   @@unique([projectId, version])
 }
+
+model FurnitureItem {
+  id           String   @id @default(cuid())
+  name         String
+  category     String
+  style        String?
+  color        String?
+  tags         String[]
+  cloudinaryUrl String
+  publicId     String
+  thumbnailUrl  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
