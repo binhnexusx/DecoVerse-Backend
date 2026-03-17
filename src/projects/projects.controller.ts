@@ -1,4 +1,12 @@
-import { Body, Param, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Param,
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  Delete,
+} from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../common/decorators/get-user.decorator';
@@ -18,13 +26,20 @@ export class ProjectsController {
   }
 
   @Get()
-  async findAll(@GetUser('id') userId: string) {
-    return this.projectsService.findAll(userId);
+  async findAll(
+    @GetUser('id') userId: string,
+    @GetUser('email') userEmail: string,
+  ) {
+    return this.projectsService.findAll(userId, userEmail);
   }
 
   @Get(':id')
-  async findOne(@Param('id') projectId: string, @GetUser('id') userId: string) {
-    return this.projectsService.findOne(projectId, userId);
+  async findOne(
+    @Param('id') projectId: string,
+    @GetUser('id') userId: string,
+    @GetUser('email') userEmail: string,
+  ) {
+    return this.projectsService.findOne(projectId, userId, userEmail);
   }
 
   @Post(':id/version')
@@ -34,5 +49,30 @@ export class ProjectsController {
     @GetUser('id') userId: string,
   ) {
     return this.projectsService.saveVersion(projectId, userId, designData);
+  }
+
+  @Post(':id/share')
+  async addCollaborate(
+    @Param('id') projectId: string,
+    @GetUser('id') userId: string,
+    @Body('email') email: string,
+  ) {
+    return this.projectsService.addCollaborator(projectId, userId, email);
+  }
+
+  @Get(':id/collaborators')
+  async getCollaborators(
+    @Param('id') projectId: string,
+    @GetUser('id') userId: string,
+  ) {
+    return this.projectsService.getCollaborator(projectId, userId);
+  }
+
+  @Delete('share/:accessId')
+  async revokeAccess(
+    @Param('accessId') accessId: string,
+    @GetUser('id') userId: string,
+  ) {
+    return this.projectsService.revokeAccess(accessId, userId);
   }
 }

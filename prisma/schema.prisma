@@ -14,6 +14,7 @@ model user {
   name      String?
   picture   String?
   projects  project[]
+  accessList ProjectAccess[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -27,7 +28,7 @@ model project {
   prompt    String?
   previewUrl String?
   versions   project_version[]
-  shares     ProjectShare[]
+  accessList ProjectAccess[]
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
 }
@@ -63,6 +64,7 @@ model ProjectAccess {
   projectId String
   email     String   
   userId    String? 
+  user      user?     @relation(fields: [userId], references: [id])
   project   project  @relation(fields: [projectId], references: [id])
   createdAt DateTime @default(now())
 
