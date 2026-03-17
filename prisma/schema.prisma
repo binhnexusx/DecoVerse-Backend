@@ -27,6 +27,7 @@ model project {
   prompt    String?
   previewUrl String?
   versions   project_version[]
+  shares     ProjectShare[]
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
 }
@@ -55,4 +56,16 @@ model FurnitureItem {
   thumbnailUrl  String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model ProjectAccess {
+  id        String   @id @default(cuid())
+  projectId String
+  email     String   
+  userId    String? 
+  project   project  @relation(fields: [projectId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, email])
+  @@map("project_access")
 }
