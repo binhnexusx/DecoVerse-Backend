@@ -2,6 +2,23 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import axios from 'axios';
 import { v2 as cloudinary } from 'cloudinary';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { ModelsService } from '../models/models.service';
+
+interface GeminiRoomObject {
+  id: string;
+  name: string;
+  type: string;
+  category: string;
+  color: string;
+  position: { x: number; y: number; z: number };
+  size: { width: number; height: number; depth: number };
+  rotation: { y: number };
+}
+
+interface GeminiParsedRoom {
+  roomSize: { width: number; height: number; depth: number };
+  objects: GeminiRoomObject[];
+}
 
 @Injectable()
 export class AiService {
@@ -10,7 +27,7 @@ export class AiService {
 
   private genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-  constructor() {
+  constructor(private readonly modelsService: ModelsService) {
     cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
       api_key: process.env.CLOUDINARY_API_KEY,
@@ -63,16 +80,17 @@ export class AiService {
       const imageBase64 = Buffer.from(imageResponse.data).toString('base64');
 
       const prompt = `
-You are an interior design analyzer. Analyze this room image and identify all furniture and objects.
+You are an expert 3D interior designer. Analyze this room image carefully and return a precise JSON layout.
 
-Return ONLY a valid JSON object (no markdown, no explanation) in this exact format:
+Return ONLY valid JSON, no markdown, no explanation:
 {
   "roomSize": { "width": number, "height": number, "depth": number },
   "objects": [
     {
-      "id": "unique_id",
+      "id": "unique_snake_case_id",
       "name": "object name in English",
       "type": "furniture|decoration|lighting|appliance",
+      "category": "sofa|bed|chair|dining_table|coffee_table|desk|wardrobe|shelf|lamp|plant|television|rug|decoration|appliance",
       "color": "#hexcolor",
       "position": { "x": number, "y": number, "z": number },
       "size": { "width": number, "height": number, "depth": number },
@@ -81,14 +99,37 @@ Return ONLY a valid JSON object (no markdown, no explanation) in this exact form
   ]
 }
 
-Rules:
-- position (x, y, z) and size (width, height, depth) are in METERS
-- position.y = 0 means object is on the floor
-- position.y = half of object height for objects standing on floor
-- x = left/right from room center, z = front/back from room center
-- roomSize should be estimated from what you see (typical room: 5x3x4)
-- Return at least 3 objects, maximum 15 objects
-- Only return the JSON, nothing else
+COORDINATE RULES (very important):
+- Room center = (0, 0, 0)
+- x: negative = left wall, positive = right wall (max ±width/2)
+- z: negative = back wall, positive = front/camera side (max ±depth/2)
+- y: always = 0 for floor objects (bed, sofa, table, chair, plant, rug)
+- y: use actual height for wall-mounted or elevated objects (tv on stand = stand height)
+- size: realistic meters (sofa: 2x0.8x0.9, bed: 1.8x0.5x2, chair: 0.6x0.9x0.6)
+
+CATEGORY RULES (use exact string values):
+- sofa, sectional sofa, couch → "sofa"
+- bed, mattress → "bed"
+- chair, armchair, office chair, gaming chair, stool → "chair"
+- coffee table, side table, nightstand, end table → "coffee_table"
+- dining table → "dining_table"
+- desk, gaming desk, writing desk → "desk"
+- wardrobe, dresser, cabinet, chest of drawers → "wardrobe"
+- bookshelf, tv stand, media console, shelf, rack → "shelf"
+- lamp, floor lamp, table lamp, ceiling light, chandelier → "lamp"
+- plant, potted plant, tree → "plant"
+- tv, monitor, screen, television → "television"
+- rug, carpet, area rug, mat → "rug"
+- curtain, wall art, picture, mirror, vase, pillow, decoration → "decoration"
+
+POSITIONING RULES:
+- Place objects realistically: sofa faces TV, bed against back wall, desk near side wall
+- No objects should overlap
+- Keep all objects within room bounds (x: ±width/2, z: ±depth/2)
+- Bed headboard at back wall: z = -(depth/2 - 1.2)
+- TV/media console at front or side wall opposite sofa
+- Return 6-12 objects maximum
+- SKIP: ceiling lights, spotlights, wall art, windows, doors, baseboards, curtains
 `;
 
       const result = await model.generateContent([
@@ -102,7 +143,6 @@ Rules:
       ]);
 
       const rawText = result.response.text().trim();
-
       const cleanText = rawText
         .replace(/```json/g, '')
         .replace(/```/g, '')
@@ -111,17 +151,17 @@ Rules:
         .trim();
 
       const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('Gemini did not return valid JSON');
-      }
+      if (!jsonMatch) throw new Error('Gemini did not return valid JSON');
 
       const jsonStr = jsonMatch[0]
         .replace(/'/g, '"')
         .replace(/,\s*}/g, '}')
         .replace(/,\s*]/g, ']');
 
-      const parsed = JSON.parse(jsonStr) as unknown;
-      return parsed;
+      const parsed = JSON.parse(jsonStr) as GeminiParsedRoom;
+
+      const matched = await this.modelsService.matchFromGemini(parsed);
+      return matched;
     } catch (err) {
       console.error('analyzeImage error:', err);
       throw new InternalServerErrorException('Image analysis failed');
