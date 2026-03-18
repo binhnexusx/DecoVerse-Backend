@@ -75,4 +75,9 @@ export class ProjectsController {
   ) {
     return this.projectsService.revokeAccess(accessId, userId);
   }
+
+  @Get(':id/messages')
+  async getMessages(@Param('id') projectId: string) {
+    return this.projectsService.getMessages(projectId);
+  }
 }
