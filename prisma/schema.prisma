@@ -14,6 +14,7 @@ model user {
   name      String?
   picture   String?
   projects  project[]
+  accessList ProjectAccess[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -27,6 +28,7 @@ model project {
   prompt    String?
   previewUrl String?
   versions   project_version[]
+  accessList ProjectAccess[]
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
 }
@@ -55,4 +57,17 @@ model FurnitureItem {
   thumbnailUrl  String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model ProjectAccess {
+  id        String   @id @default(cuid())
+  projectId String
+  email     String   
+  userId    String? 
+  user      user?     @relation(fields: [userId], references: [id])
+  project   project  @relation(fields: [projectId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, email])
+  @@map("project_access")
 }
