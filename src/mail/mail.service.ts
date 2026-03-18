@@ -1,20 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 
 @Injectable()
 export class MailService {
+  private readonly logger = new Logger(MailService.name);
   private resend: Resend;
 
-  constructor() {
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+  constructor(private configService: ConfigService) {
+    const apiKey = this.configService.get<string>('RESEND_API_KEY');
+
+    if (!apiKey) {
+      this.logger.error('RESEND_API_KEY is not defined');
+      throw new Error(
+        'Missing API key. Pass it to the constructor `new Resend("re_123")`',
+      );
+    }
+
+    this.resend = new Resend(apiKey);
   }
+
   async sendInviteEmail(
     toEmail: string,
     projectName: string,
     projectId: string,
     ownerName: string,
   ) {
-    const inviteLink = `${process.env.FRONTEND_URL}/projects/${projectId}`;
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const inviteLink = `${frontendUrl}/projects/${projectId}`;
 
     try {
       await this.resend.emails.send({
@@ -39,8 +52,10 @@ export class MailService {
           </div>
         `,
       });
+
+      this.logger.log(`Email sent successfully to ${toEmail}`);
     } catch (error) {
-      console.error('Error sending email:', error);
+      this.logger.error('Error sending email:', error);
     }
   }
 }
