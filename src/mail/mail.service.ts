@@ -4,20 +4,9 @@ import { Resend } from 'resend';
 
 @Injectable()
 export class MailService {
-  private readonly logger = new Logger(MailService.name);
-  private resend: Resend;
-
-  constructor(private configService: ConfigService) {
-    const apiKey =
-      this.configService.get<string>('RESEND_API_KEY') ||
-      process.env.RESEND_API_KEY;
-
-    if (!apiKey) {
-      this.logger.error('RESEND_API_KEY is missing');
-      throw new Error('Missing API key');
-    }
-
-    this.resend = new Resend(apiKey);
+  private readonly resend: Resend;
+  constructor() {
+    this.resend = new Resend(process.env.RESEND_API_KEY);
   }
 
   async sendInviteEmail(

@@ -182,4 +182,16 @@ export class ProjectsService {
 
     return { isOwner };
   }
+
+  async getMessages(projectId: string) {
+    return this.prisma.chatMessage.findMany({
+      where: { projectId },
+      include: {
+        user: {
+          select: { name: true },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
 }
