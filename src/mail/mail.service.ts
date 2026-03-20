@@ -5,8 +5,11 @@ import { Resend } from 'resend';
 @Injectable()
 export class MailService {
   private readonly resend: Resend;
-  constructor() {
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+  private readonly logger = new Logger(MailService.name);
+
+  constructor(private readonly configService: ConfigService) {
+    const apiKey = this.configService.get<string>('RESEND_API_KEY');
+    this.resend = new Resend(apiKey);
   }
 
   async sendInviteEmail(
@@ -19,6 +22,7 @@ export class MailService {
       const frontendUrl =
         this.configService.get<string>('FRONTEND_URL') ||
         process.env.FRONTEND_URL;
+
       const inviteLink = `${frontendUrl}/projects/${projectId}`;
 
       await this.resend.emails.send({
@@ -46,6 +50,7 @@ export class MailService {
       this.logger.log(`Email sent to ${toEmail}`);
     } catch (error) {
       this.logger.error('Send email failed:', error);
+      throw error;
     }
   }
 }
