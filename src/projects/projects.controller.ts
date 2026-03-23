@@ -17,6 +17,11 @@ import { CreateProjectDto } from '../projects/dto/create-projects.dto';
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
+  @Get('count/collaborations')
+  async getCount(@GetUser('id') userId: string) {
+    return this.projectsService.getCollaborationCount(userId);
+  }
+
   @Post()
   async create(@Body() dto: CreateProjectDto, @GetUser('id') userId: string) {
     return this.projectsService.create({
