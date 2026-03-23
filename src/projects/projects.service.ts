@@ -150,6 +150,19 @@ export class ProjectsService {
     });
   }
 
+  async getCollaborationCount(ownerId: string) {
+    const groups = await this.prisma.projectAccess.groupBy({
+      by: ['email'],
+      where: {
+        project: {
+          userId: ownerId,
+        },
+      },
+    });
+
+    return groups.length;
+  }
+
   async revokeAccess(accessId: string, ownerId: string) {
     return this.prisma.projectAccess.delete({
       where: {
