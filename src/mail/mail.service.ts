@@ -1,19 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer'; // Thay đổi import
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class MailService {
-  private readonly transporter: nodemailer.Transporter; // Thay đổi kiểu dữ liệu
+  private readonly transporter: nodemailer.Transporter;
   private readonly logger = new Logger(MailService.name);
 
   constructor(private readonly configService: ConfigService) {
-    // Khởi tạo Transporter cho Gmail
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: this.configService.get<string>('MAIL_USER'), // Email Gmail của bạn
-        pass: this.configService.get<string>('MAIL_PASS'), // Mật khẩu ứng dụng (App Password)
+        user: this.configService.get<string>('MAIL_USER'),
+        pass: this.configService.get<string>('MAIL_PASS'),
       },
     });
   }
@@ -32,9 +31,8 @@ export class MailService {
       const inviteLink = `${frontendUrl}/projects/${projectId}`;
       const mailUser = this.configService.get<string>('MAIL_USER');
 
-      // Sử dụng sendMail của nodemailer thay vì resend
       await this.transporter.sendMail({
-        from: `"DecoVerse" <${mailUser}>`, // Hiển thị tên DecoVerse rõ ràng
+        from: `"DecoVerse" <${mailUser}>`,
         to: toEmail,
         subject: `🎨 ${ownerName} invited you to view "${projectName}"`,
         html: `
