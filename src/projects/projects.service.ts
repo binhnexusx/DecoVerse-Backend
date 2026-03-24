@@ -77,6 +77,11 @@ export class ProjectsService {
       },
       include: {
         accessList: true,
+        _count: {
+          select: {
+            versions: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
